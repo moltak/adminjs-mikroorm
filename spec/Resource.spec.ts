@@ -25,7 +25,7 @@ describe('Resource', () => {
   });
 
   beforeEach(async () => {
-    resource = new Resource(Car);
+    resource = new Resource({ model: Car, orm });
 
     await orm.em.getRepository(Car).nativeDelete({});
     await orm.em.getRepository(User).nativeDelete({});
@@ -38,16 +38,14 @@ describe('Resource', () => {
 
   describe('.isAdapterFor', () => {
     it('returns false if `orm` is not set before', () => {
-      expect(Resource.isAdapterFor(Car)).toEqual(false);
+      expect(Resource.isAdapterFor(Car as any)).toEqual(false);
     });
 
-    it('returns true when Entity is given and `orm` is set', () => {
-      Resource.setORM(orm);
-      expect(Resource.isAdapterFor(Car)).toEqual(true);
+    it('returns true when correct args are given', () => {
+      expect(Resource.isAdapterFor({ model: Car, orm })).toEqual(true);
     });
 
     it('returns false for any other kind of resources', () => {
-      Resource.setORM(orm);
       expect(Resource.isAdapterFor({ Car: true } as any)).toEqual(false);
     });
   });

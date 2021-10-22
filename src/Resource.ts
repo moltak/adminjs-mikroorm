@@ -21,38 +21,36 @@ export type AdapterORM = {
   metadata: MetadataStorage;
 };
 
-// eslint-disable-next-line max-len
-const OrmNotFoundError = 'ORM is not set. Make sure to set it before registering the adapter: AdminJS.setORM(mikroOrmInstance)';
-
 export class Resource extends BaseResource {
-  public static orm: AdapterORM;
-
   public static validate: any;
 
-  private metadata: EntityMetadata | undefined;
+  private orm: MikroORM;
+
+  private metadata?: EntityMetadata;
 
   private model: EntityClass<AnyEntity>;
 
   private propertiesObject: Record<string, Property>;
 
-  constructor(model: EntityClass<AnyEntity>) {
-    super(model);
+  constructor(args: { model: EntityClass<AnyEntity>, orm: MikroORM }) {
+    super(args);
+
+    const { model, orm } = args;
+    this.orm = orm;
     this.model = model;
-    this.metadata = Resource.orm?.metadata?.find(model.name);
+    this.metadata = this.orm.getMetadata().find(model.name);
     this.propertiesObject = this.prepareProperties();
   }
 
-  public static setORM(orm: MikroORM) {
-    orm.getMetadata().decorate(orm.em);
-    Resource.orm = Resource.stripOrmConfig(orm);
-  }
-
   public databaseName(): string {
-    return Resource.orm?.database || 'mikroorm';
+    const {
+      database,
+    } = this.orm.config.getDriver().getConnection().getConnectionOptions();
+    return database || 'mikroorm';
   }
 
   public databaseType(): string {
-    return Resource.orm?.databaseType || this.databaseName();
+    return this.orm.config.getAll().type || this.databaseName();
   }
 
   public name(): string {
@@ -76,20 +74,16 @@ export class Resource extends BaseResource {
   }
 
   public async count(filter: Filter): Promise<number> {
-    if (!Resource.orm) throw new Error(OrmNotFoundError);
-
-    return Resource.orm.entityManager.getRepository(this.model).count(
+    return this.orm.em.getRepository(this.model).count(
       convertFilter(filter),
     );
   }
 
   public async find(filter: Filter, params: Record<string, any> = {}): Promise<Array<BaseRecord>> {
-    if (!Resource.orm) throw new Error(OrmNotFoundError);
-
     const { limit = 10, offset = 0, sort = {} } = params;
     const { direction, sortBy } = sort as { direction: 'asc' | 'desc', sortBy: string };
 
-    const results = await Resource.orm.entityManager
+    const results = await this.orm.em
       .getRepository(this.model)
       .find(
         convertFilter(filter), {
@@ -105,11 +99,9 @@ export class Resource extends BaseResource {
   }
 
   public async findOne(id: string | number): Promise<BaseRecord | null> {
-    if (!Resource.orm) throw new Error(OrmNotFoundError);
-
-    const result = await Resource.orm.entityManager
+    const result = await this.orm.em
       .getRepository(this.model)
-      .findOne(id as any); // mikroorm has incorrect types for findOne
+      .findOne(id as any); // mikroorm has incorrect types for `findOne`
 
     if (!result) return null;
 
@@ -119,12 +111,10 @@ export class Resource extends BaseResource {
   public async findMany(
     ids: Array<string | number>,
   ): Promise<Array<BaseRecord>> {
-    if (!Resource.orm) throw new Error(OrmNotFoundError);
-
     const pk = this.metadata?.primaryKeys[0];
     if (!pk) return [];
 
-    const results = await Resource.orm.entityManager
+    const results = await this.orm.em
       .getRepository(this.model)
       .find({ [pk]: { $in: ids } });
 
@@ -132,9 +122,7 @@ export class Resource extends BaseResource {
   }
 
   public async create(params: Record<string, any>): Promise<Record<string, any>> {
-    if (!Resource.orm) throw new Error(OrmNotFoundError);
-
-    const instance = Resource.orm?.entityManager
+    const instance = this.orm.em
       .getRepository(this.model)
       .create(flat.unflatten(params));
 
@@ -146,9 +134,7 @@ export class Resource extends BaseResource {
   }
 
   public async update(pk: string | number, params: Record<string, any> = {}): Promise<Record<string, any>> {
-    if (!Resource.orm) throw new Error(OrmNotFoundError);
-
-    const instance = await Resource.orm?.entityManager
+    const instance = await this.orm.em
       .getRepository(this.model)
       .findOne(pk as any); // mikroorm has incorrect types for findOneOrFail
 
@@ -164,32 +150,15 @@ export class Resource extends BaseResource {
   }
 
   public async delete(id: string | number): Promise<void> {
-    if (!Resource.orm) return;
-
-    await Resource.orm?.entityManager
+    await this.orm.em
       .getRepository(this.model)
       .nativeDelete(id as any); // mikroorm has incorrect types for nativeDelete
   }
 
-  public static isAdapterFor(rawResource: EntityClass<AnyEntity>): boolean {
-    try {
-      if (Resource.orm === null) return false;
-      const metadata = Resource.orm?.metadata?.find(rawResource.name);
-      return !!metadata;
-    } catch (e) {
-      return false;
-    }
-  }
+  public static isAdapterFor(args?: { model?: EntityClass<AnyEntity>, orm?: MikroORM }): boolean {
+    const { model, orm } = args ?? {};
 
-  public static stripOrmConfig(orm: MikroORM) {
-    const {
-      database,
-    } = orm.config.getDriver().getConnection().getConnectionOptions();
-    const databaseType = orm.config.getAll().type;
-    const entityManager = orm.em;
-    const metadata = orm.getMetadata();
-
-    return { database, databaseType, entityManager, metadata };
+    return !!model?.name && !!orm?.getMetadata?.().find?.(model.name);
   }
 
   async validateAndSave(instance: Loaded<AnyEntity>): Promise<void> {
@@ -210,7 +179,7 @@ export class Resource extends BaseResource {
       }
     }
     try {
-      await Resource.orm?.entityManager.persistAndFlush(instance);
+      await this.orm.em.persistAndFlush(instance);
     } catch (error) {
       if (error.name === 'QueryFailedError') {
         throw new ValidationError({

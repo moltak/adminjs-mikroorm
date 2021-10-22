@@ -24,14 +24,13 @@ const run = async () => {
     debug: true,
   });
 
-  Resource.setORM(orm as any);
   AdminJS.registerAdapter({ Database, Resource });
 
   const app = express();
 
   const resources = [
     {
-      resource: User,
+      resource: { model: User, orm },
       options: {
         properties: {
           firstName: {
@@ -41,7 +40,7 @@ const run = async () => {
       },
     },
     {
-      resource: Car,
+      resource: { model: Car, orm },
       options: {
         properties: {
           meta: { type: 'mixed' },
@@ -54,7 +53,7 @@ const run = async () => {
         },
       },
     },
-    Seller,
+    { model: Seller, orm },
   ];
 
   const admin = new AdminJS({

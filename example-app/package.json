@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@adminjs/express": "^4.0.0",
+    "@adminjs/mikroorm": "^1.0.0",
     "@mikro-orm/core": "^4.5.0",
     "@mikro-orm/postgresql": "^4.5.0",
     "adminjs": "^5.2.2",

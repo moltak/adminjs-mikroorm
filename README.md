@@ -31,17 +31,13 @@ const setupAdminJs = async () => {
     clientUrl: process.env.DATABASE_URL,
   });
 
-  // MikroORM exposes it's entity manager through created ORM instance (`orm.em`) and it's required for
-  // the adapter to run database queries. The static method `Resource.setORM` extracts required properties from your
-  // ORM instance.
-  Resource.setORM(orm);
   // If your entities use `class-validator` to validate data, you can inject it's validate method into the resource.
   Resource.validate = validate;
   AdminJS.registerAdapter({ Database, Resource });
 
   // You can instantiate AdminJS either by specifying all resources separately:
   const adminJs = new AdminJS({
-    resources: [{ resource: User, options: {} }],
+    resources: [{ resource: { model: User, orm }, options: {} }],
   });
 
   // Or by passing your ORM instance into `databases` property.

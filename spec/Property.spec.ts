@@ -17,8 +17,7 @@ describe('Property', () => {
 
   beforeAll(async () => {
     orm = await initORM();
-    Resource.setORM(orm);
-    resource = new Resource(Car);
+    resource = new Resource({ model: Car, orm });
     properties = resource.properties();
   });
 

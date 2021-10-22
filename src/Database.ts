@@ -14,9 +14,11 @@ export class Database extends BaseDatabase {
     if (!metadata) return [];
     metadata.decorate(this.orm.em);
 
-    Resource.setORM(this.orm);
     return Object.values(metadata.getAll()).reduce((memo: Resource[], meta) => {
-      const resource = new Resource(meta.class);
+      const resource = new Resource({
+        model: meta.class,
+        orm: this.orm,
+      });
       memo.push(resource);
 
       return memo;
@@ -24,6 +26,6 @@ export class Database extends BaseDatabase {
   }
 
   public static isAdapterFor(orm: MikroORM): boolean {
-    return !!orm.isConnected && orm.isConnected() && !!orm.getMetadata();
+    return !!orm.isConnected?.() && !!orm.getMetadata?.();
   }
 }
