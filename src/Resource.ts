@@ -195,7 +195,7 @@ export class Resource extends BaseResource {
   private prepareProperties(): { [propertyPath: string]: Property } {
     const { hydrateProps = [] } = this.metadata ?? {};
     return hydrateProps.reduce((memo, prop, index) => {
-      if (!['scalar', 'm:1', '1:1'].includes(prop.reference)) return memo;
+      if (!['scalar', 'm:1', '1:1', 'm:n'].includes(prop.reference)) return memo;
 
       const property = new Property(prop, index);
       memo[property.path()] = property;
