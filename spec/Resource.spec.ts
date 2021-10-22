@@ -1,8 +1,7 @@
 import 'reflect-metadata';
-import { BaseProperty, BaseRecord, ValidationError, Filter } from 'admin-bro';
+import { BaseProperty, BaseRecord, ValidationError, Filter, flat } from 'adminjs';
 import { validate } from 'class-validator';
 import { MikroORM } from '@mikro-orm/core';
-import flat from 'flat';
 
 import { Resource } from '../src/Resource';
 

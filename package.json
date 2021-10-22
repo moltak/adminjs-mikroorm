@@ -1,10 +1,10 @@
 {
-  "name": "admin-bro-mikroorm",
-  "description": "MikroORM adapter for AdminBro",
+  "name": "@adminjs/mikroorm",
+  "description": "MikroORM adapter for AdminJS",
   "keywords": [
     "mikroorm",
     "provider",
-    "admin-bro",
+    "adminjs",
     "orm admin",
     "mikroorm admin",
     "admin panel"
@@ -12,7 +12,7 @@
   "author": "Rafał Dzięgielewski <rafal.dzieg@gmail.com>",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "scripts": {
     "clean": "rm -fR lib",
@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dziraf/admin-bro-mikroorm.git"
+    "url": "git+https://github.com/SoftwareBrothers/adminjs-mikroorm.git"
   },
   "husky": {
     "hooks": {
@@ -35,11 +35,9 @@
   },
   "peerDependencies": {
     "@mikro-orm/core": "^4.5.0",
-    "admin-bro": "^3.4.0"
+    "adminjs": "^5.2.2"
   },
-  "dependencies": {
-    "flat": "^5.0.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
@@ -51,7 +49,7 @@
     "@types/node": "^14.14.36",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
-    "admin-bro": "^3.4.0",
+    "adminjs": "^5.2.2",
     "class-validator": "^0.13.1",
     "dotenv-cli": "^4.0.0",
     "eslint": "^7.22.0",

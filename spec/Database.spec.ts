@@ -16,7 +16,7 @@ describe('Database', () => {
   });
 
   describe('.isAdapterFor', () => {
-    it('returns true when typeorm connection is given', () => {
+    it('returns true when mikroorm connection is given', () => {
       expect(Database.isAdapterFor(orm)).toEqual(true);
     });
 

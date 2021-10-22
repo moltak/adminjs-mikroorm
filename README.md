@@ -1,33 +1,29 @@
-## admin-bro-mikroorm
+## adminjs-mikroorm
 
-This is an *unofficial* [admin-bro](https://github.com/SoftwareBrothers/admin-bro) adapter which integrates [MikroORM](https://github.com/mikro-orm/mikro-orm) into admin-bro.
-
-Note that this is a first release and it's currently tested using only the example setup found in this repository.
-
-If you are having trouble integrating this adapter in your project, please open an issue and try to describe the problem with as many details as possible.
+This is an official [AdminJS](https://github.com/SoftwareBrothers/adminjs) adapter which integrates [MikroORM](https://github.com/mikro-orm/mikro-orm) into AdminJS.
 
 ### Installation
 
 yarn
 ```bash
-$ yarn add admin-bro-mikroorm
+$ yarn add @adminjs/mikroorm
 ```
 
 npm
 ```bash
-$ npm i admin-bro-mikroorm
+$ npm i @adminjs/mikroorm
 ```
 
 ## Usage
 
-The plugin can be registered using standard `AdminBro.registerAdapter` method.
+The plugin can be registered using standard `AdminJS.registerAdapter` method.
 
 ```typescript
-import { Database, Resource } from 'admin-bro-mikroorm';
-import AdminBro from 'admin-bro';
+import { Database, Resource } from '@adminjs/mikroorm';
+import AdminJS from 'adminjs';
 import { validate } from 'class-validator';
 
-const setupAdminBro = async () => {
+const setupAdminJs = async () => {
   const orm = await MikroORM.init({
     entities: [User],
     dbName: process.env.DATABASE_NAME,
@@ -41,15 +37,15 @@ const setupAdminBro = async () => {
   Resource.setORM(orm);
   // If your entities use `class-validator` to validate data, you can inject it's validate method into the resource.
   Resource.validate = validate;
-  AdminBro.registerAdapter({ Database, Resource });
+  AdminJS.registerAdapter({ Database, Resource });
 
-  // You can instantiate AdminBro either by specifying all resources separately:
-  const adminBro = new AdminBro({
+  // You can instantiate AdminJS either by specifying all resources separately:
+  const adminJs = new AdminJS({
     resources: [{ resource: User, options: {} }],
   });
 
   // Or by passing your ORM instance into `databases` property.
-  const adminBro = new AdminBro({
+  const adminJs = new AdminJS({
     databases: [orm],
   });
   // You should choose to use either `resources` or `databases`
@@ -86,15 +82,15 @@ yarn link
 
 4. Setup example app
 
-Install all dependencies and use previously linked version of `admin-bro-mikroorm`.
+Install all dependencies and use previously linked version of `@adminjs/mikroorm`.
 
 ```
 cd example-app
 yarn install
-yarn link admin-bro-mikroorm
+yarn link "@adminjs/mikroorm"
 ```
 
-Optionally you might want to link your local version of `admin-bro` package
+Optionally you might want to link your local version of `adminjs` package
 
 5. Make sure you have all the envs set (see `./example-app/example.env` and create an `.env` file based on that)
 
