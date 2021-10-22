@@ -54,7 +54,7 @@ An example project can be found in `example-app` directory.
 
 ## Associations
 
-Currently only `ManyToOne` and `OneToOne` relationships are supported due to current AdminBro's core limitations
+Currently only `ManyToOne` and `OneToOne` relationships are supported due to current AdminJS's core limitations
 for adapter integrations. `OneToMany` and `ManyToMany` relationships can still be achieved through a combination of custom components and hooks.
 
 ## Contribution
