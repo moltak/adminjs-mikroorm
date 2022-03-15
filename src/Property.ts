@@ -26,6 +26,12 @@ export class Property extends BaseProperty {
     return !!this.column.primary;
   }
 
+  public isRequired(): boolean {
+    if (this.column.nullable === false) return true;
+
+    return false;
+  }
+
   public isSortable(): boolean {
     return this.type() !== 'reference';
   }
@@ -53,12 +59,15 @@ export class Property extends BaseProperty {
   }
 
   public type(): PropertyType {
-    let type: PropertyType = DATA_TYPES[this.column.columnTypes[0]];
+    let type: PropertyType = DATA_TYPES[this.column.columnTypes[0]]
+      || DATA_TYPES[this.column.type];
 
     if (this.reference()) { type = 'reference'; }
 
     // eslint-disable-next-line no-console
-    if (!type) { console.warn(`Unhandled type: ${this.column.type}`); }
+    if (!type) {
+      console.warn(`Unhandled type: ${this.column.type}`);
+    }
 
     return type;
   }

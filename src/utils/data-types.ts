@@ -26,6 +26,7 @@ const NUMBER = [
   'fixed',
   'numeric',
   'number',
+  'serial',
 
   // WithWidthColumnType:
   'tinyint',

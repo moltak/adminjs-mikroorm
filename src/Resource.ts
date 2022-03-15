@@ -181,7 +181,10 @@ export class Resource extends BaseResource {
     try {
       await this.orm.em.persistAndFlush(instance);
     } catch (error) {
-      if (error.name === 'QueryFailedError') {
+      // TODO: figure out how to get column name from MikroORM's error metadata
+      // It currently seems to return only whole Entity
+      console.log(error);
+      if (error.name === 'QueryFailedError' || error.name === 'ValidationError') {
         throw new ValidationError({
           [error.column]: {
             type: 'QueryFailedError',
