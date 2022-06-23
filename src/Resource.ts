@@ -74,7 +74,7 @@ export class Resource extends BaseResource {
   }
 
   public async count(filter: Filter): Promise<number> {
-    return this.orm.em.getRepository(this.model).count(
+    return this.orm.em.fork().getRepository(this.model).count(
       convertFilter(filter),
     );
   }
@@ -84,6 +84,7 @@ export class Resource extends BaseResource {
     const { direction, sortBy } = sort as { direction: 'asc' | 'desc', sortBy: string };
 
     const results = await this.orm.em
+      .fork()
       .getRepository(this.model)
       .find(
         convertFilter(filter), {
@@ -100,6 +101,7 @@ export class Resource extends BaseResource {
 
   public async findOne(id: string | number): Promise<BaseRecord | null> {
     const result = await this.orm.em
+      .fork()
       .getRepository(this.model)
       .findOne(id as any); // mikroorm has incorrect types for `findOne`
 
@@ -115,6 +117,7 @@ export class Resource extends BaseResource {
     if (!pk) return [];
 
     const results = await this.orm.em
+      .fork()
       .getRepository(this.model)
       .find({ [pk]: { $in: ids } });
 
@@ -122,11 +125,12 @@ export class Resource extends BaseResource {
   }
 
   public async create(params: Record<string, any>): Promise<Record<string, any>> {
-    const instance = this.orm.em
+    const em = this.orm.em.fork();
+    const instance = em
       .getRepository(this.model)
       .create(flat.unflatten(params));
 
-    await this.validateAndSave(instance);
+    await this.validateAndSave(instance, em);
 
     const returnedParams: Record<string, any> = flat.flatten(wrap(instance).toJSON());
 
@@ -134,7 +138,8 @@ export class Resource extends BaseResource {
   }
 
   public async update(pk: string | number, params: Record<string, any> = {}): Promise<Record<string, any>> {
-    const instance = await this.orm.em
+    const em = this.orm.em.fork();
+    const instance = await em
       .getRepository(this.model)
       .findOne(pk as any); // mikroorm has incorrect types for findOneOrFail
 
@@ -142,7 +147,7 @@ export class Resource extends BaseResource {
 
     const updatedInstance = wrap(instance).assign(flat.unflatten(params));
 
-    await this.validateAndSave(updatedInstance);
+    await this.validateAndSave(updatedInstance, em);
 
     const returnedParams: Record<string, any> = flat.flatten(wrap(updatedInstance).toJSON());
 
@@ -151,6 +156,7 @@ export class Resource extends BaseResource {
 
   public async delete(id: string | number): Promise<void> {
     await this.orm.em
+      .fork()
       .getRepository(this.model)
       .nativeDelete(id as any); // mikroorm has incorrect types for nativeDelete
   }
@@ -161,7 +167,7 @@ export class Resource extends BaseResource {
     return !!model?.name && !!orm?.getMetadata?.().find?.(model.name);
   }
 
-  async validateAndSave(instance: Loaded<AnyEntity>): Promise<void> {
+  async validateAndSave(instance: Loaded<AnyEntity>, em: EntityManager): Promise<void> {
     if (Resource.validate) {
       const errors = await Resource.validate(instance);
       if (errors && errors.length) {
@@ -179,7 +185,7 @@ export class Resource extends BaseResource {
       }
     }
     try {
-      await this.orm.em.persistAndFlush(instance);
+      await em.persistAndFlush(instance);
     } catch (error) {
       // TODO: figure out how to get column name from MikroORM's error metadata
       // It currently seems to return only whole Entity
