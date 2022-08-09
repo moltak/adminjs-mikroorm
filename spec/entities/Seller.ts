@@ -11,5 +11,5 @@ export class Seller extends BaseEntity<Seller, 'id'> {
   name: string;
 
   @OneToMany(() => Car, (car) => car.seller)
-  cars: Car[];
+  cars?: Car[];
 }
